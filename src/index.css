@@ -11,3 +11,165 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+#main{
+  width: 100%;
+  height: 100%;
+}
+#left-container{
+  width: 270px;
+  float:left;
+  height: auto;
+}
+#right-container{
+  width: calc(100vw - 300px);
+  float:left;
+  height: auto;
+  text-align: center;
+}
+.column {
+  float: left;
+  min-width: 220px;
+  height: 380px;
+}
+.image-item{
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+}
+.label-item{
+  width: 200px;
+}
+
+/* Popup container - can be anything you want */
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+  visibility: hidden;
+  width: 160px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -80px;
+}
+
+/* Popup arrow */
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;} 
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+
+/* dialog */
+
+.hidden { display:none; } /* used by the dialog by default */
+
+/* When the dialog is shown, the mask will cover the main web page */
+#mask {
+  position:absolute;
+  background-color:rgba(0,0,0,.25);
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1; /* This layers the mask on top of the main web page content. */
+}
+
+/* Style the dialog and the elements in it as you wish */
+#dialog { 
+  position:absolute; /* So the dialog can be in its own layer and placed anywhere we want */
+  top:20%;
+  left:25%;
+  border:10px double #222;
+  background-color:aliceblue;
+  padding:10px;
+  width:50%;
+  height:125px;
+  text-align:center;
+  z-index:10;  /* Make sure the dialog is in the top layer */
+}
+
+#dialog > h1 {
+  margin-top:0;
+}
+
+#dialog > footer {
+  margin-top:1.5em;
+}
+
+#result {
+  text-align:center;
+  font-weight:bold;
+  font-size:2em;
+  margin:2em;
+}
+#video-container{
+  position: relative;
+    height: 314px;
+    width: 800px;
+    display: flex;
+    justify-content: center;
+     align-self: center;
+     overflow: hidden;
+  }
+  .movie-title{
+  position: absolute;
+  top: 0px;
+  }
+  
+  .btns{
+    display: flex;
+    justify-content: center;
+  }
+  .prev, .next{
+    display: flex;
+    width: 100px;
+    height: 50px;
+    background: red;
+    margin: 20px;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      cursor: pointer;
+  }
+  video{
+  height: 400px;
+  width: 400px;
+  }
