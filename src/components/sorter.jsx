@@ -1,5 +1,4 @@
 import React from "react";
-import ImageService from "../services/imageService";
 
 class Sorter extends React.Component {
 
@@ -19,12 +18,11 @@ class Sorter extends React.Component {
     dialog.classList[functionOpen]("hidden"); // Show the dialog
 
     if(isSubmit){
-      
+      this.props.onSubmit(this.state.type, this.state.value);
     }
   }
 
   render() {
-    let { type } = this.state;
     let direction = {
       date_created: [
         { title: "newest", value: "asc" },

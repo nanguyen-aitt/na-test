@@ -1,61 +1,153 @@
 import React from "react";
 import ImageService from "../services/imageService";
 import Sorter from './sorter';
+import ShowImage from './showImage';
 
 class List extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      searchText: '',
+      searchText: 'apollo',
       listImage: [],
+      pagination: {},
+      loading: false
     };
+    this.getListLocal = localStorage.getItem('imageNasa');
+    this.getPagination = localStorage.getItem('pagination');
   }
 
+
   componentDidMount = () => {
-    let dataLocal = localStorage.getItem('imageNasa');
-    if(dataLocal){
-      this.setState({ listImage: JSON.parse(dataLocal) });
+    if (this.getListLocal) {
+      this.setState({loading: true});
+      this.dataLocal = JSON.parse(this.getListLocal);
+      let pagination = JSON.parse(this.getPagination);
+      this.setState({ listImage: this.dataLocal, pagination, loading: false });
     }
+    this.activeTab();
   }
 
   getList = async () => {
-    let list = await ImageService.searchImage(this.state.searchText);
+    this.setState({loading: true});
+    let list = await ImageService.searchImage(this.state.searchText, this.state.pagination.page);
     if (list && list.collection && list.collection.items) {
       let listItems = list.collection.items;
-      this.setState({ listImage: listItems });
+      let total = list.collection.metadata.total_hits;
+      let pagination = {
+        total: total,
+        page: this.state.pagination.page || 1
+      }
+      localStorage.setItem('pagination', JSON.stringify(pagination));
       localStorage.setItem('imageNasa', JSON.stringify(listItems));
+      this.dataLocal = listItems.slice();
+      this.activeTab();
+      this.setState({ listImage: listItems, sort: undefined, type: undefined, pagination, loading: false });
+    }
+    else{
+      this.setState({loading: false});
     }
   }
 
   updateImage = (nasa_id, valueChange) => {
-    let data = localStorage.getItem('imageNasa');
-    let list = JSON.parse(data);
+    let list = this.dataLocal.slice();
     let getIndex = list.findIndex(item => item.data[0].nasa_id === nasa_id);
 
-    if(valueChange.type === 'edit'){
+    if (valueChange.type === 'edit') {
       let oldTitle = list[getIndex].data[0].title;
       var newTitle = prompt("Please enter change title:", oldTitle);
       if (newTitle !== null && newTitle !== "" && newTitle !== oldTitle) {
         list[getIndex].data[0].title = newTitle;
       }
     }
-    else{
+    else {
       list[getIndex][valueChange.type] = valueChange.value;
     }
 
     localStorage.setItem('imageNasa', JSON.stringify(list));
+    this.dataLocal = list.slice();
+    list = this.filterList(list);
     this.setState({ listImage: list });
   }
 
+  filterList = (data) => {
+    let { type, sort } = this.state;
+    if (type) {
+      data = data.filter(item => item[type]);
+    }
+    if (sort) {
+      data = this.sortList(data);
+    }
+    return data;
+  }
+
+  sortList = (data) => {
+    let { sort } = this.state;
+    data = data.sort(function (a, b) {
+      if (sort[0] === 'date_created') {
+        if (sort[1] === 'asc')
+          return Date.parse(a.data[0][sort[0]]) - Date.parse(b.data[0][sort[0]]);
+        else
+          return Date.parse(b.data[0][sort[0]]) - Date.parse(a.data[0][sort[0]]);
+      }
+      else {
+        if (sort[1] === 'asc')
+          return a.data[0][sort[0]].localeCompare(b.data[0][sort[0]]);
+        else
+          return b.data[0][sort[0]].localeCompare(a.data[0][sort[0]]);
+      }
+    });
+    return data;
+  }
+
+  activeTab = (type) => {
+    let tablinks = document.getElementsByClassName("tablinks");
+    for (let i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    let event = document.getElementById(type || 'all');
+    event.classList.add('active');
+  }
+
+
+  onChangeList = (type) => {
+    this.activeTab(type);
+    this.setState({ type, loading: true }, () => {
+      let data = this.filterList(this.dataLocal);
+      this.setState({ listImage: data, loading: false });
+    });
+  }
+
+  onChangeSort = (type, value) => {
+    this.setState({ sort: [type, value], loading: true }, () => {
+      let data = this.sortList(this.state.listImage);
+      this.setState({ listImage: data, loading: false });
+    });
+  }
+
+  showListPaginaton = (total) => {
+    let i = 0;
+    let optionArr = [];
+    while(i < total/100){
+      i++;
+      optionArr.push(<option className="select-items" value={i}>{i}</option>)
+    }
+    return (optionArr);
+  }
+
+  onChangePage = (page) => {
+    this.setState({ pagination: {...this.state.pagination, page}}, () => this.getList())
+  }
+
   render() {
-    let { listImage } = this.state;
+    let { listImage, pagination, loading } = this.state;
+    let page = pagination.page || 1;
     return (
       <div>
         <div>
           <input
             onChange={(e) => {
-              this.setState({ searchText: e.target.value })
+              this.setState({ searchText: e.target.value, pagination: {} })
             }}
             type="text"
             placeholder="Input text to search"
@@ -66,62 +158,33 @@ class List extends React.Component {
             }}
           >
             Search</button>
+
+          <Sorter onSubmit={(type, value) => this.onChangeSort(type, value)} />
         </div>
         <div id="main">
-
-          <div id="left-container">
-            <Sorter />
+          <div className="tab">
+            <button id='all' className="tablinks" onClick={() => this.onChangeList()}>All</button>
+            <button id='like' className="tablinks" onClick={() => this.onChangeList('like')}>Liked</button>
+            <button id='remove' className="tablinks" onClick={() => this.onChangeList('remove')}>Removed</button>
           </div>
-          <div id="right-container">
-
-            <div className="row">
-              {listImage.length ? listImage.map((item) => {
-                let url = item.links ? item?.links[0]?.href : null;
-                if(url){
-                  return (
-                    <div className="column">
-                      <div>
-                        <img src={item.links[0].href} className='image-item' />
-                      </div>
-                      <div className='label-item'>
-                        <label >
-                          {item.data[0].title}
-                        </label>
-                      </div>
-                      <div>
-                        <button
-                          onClick={() => this.updateImage(item.data[0].nasa_id, {type: 'like', value: !item.like}) }
-                        >
-                          {!item.like ? 'Like' : 'Unlike'}
-                        </button>
-                        <button
-                          onClick={() => this.updateImage(item.data[0].nasa_id, {type: 'remove', value: !item.remove}) }
-                        >
-                          {!item.remove ? 'Remove' : 'Undo'}
-                        </button>
-                        <button
-                          onClick={() => this.updateImage(item.data[0].nasa_id, {type: 'edit'}) }
-                        >Edit
-                        </button>
-                      </div>
-                    </div>
-                  )
-                }
-                else{
-                  return(
-                  <div id="video-container">
-                    <h1 className="movie-title">Movie title</h1>
-                    <video className="videoplayer" id="video-player_transformed" playsInline autoPlay muted>
-                      <source src="https://storage.googleapis.com/coverr-main/mp4/Sunset-Desert-Run.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-                  )
-                }
-              })
-              : null}
+          {pagination.total ?
+            <div className="pagination">
+              <label>{`Show ${(page-1)*100+1} - ${page*100 < pagination.total ? page*100 : pagination.total} of ${pagination.total} items`}</label>
+              <div class="pagination-button">
+                <button class="active" onClick="#">&laquo;</button>
+                <select onChange={(e) => this.onChangePage(+e.target.value)} value={page}>
+                  {this.showListPaginaton(pagination.total)}
+                </select>
+                <button onClick="#">&raquo;</button>
+              </div>
             </div>
-          </div>
+          : null }
         </div>
+        {loading ?
+          <div class="loader"/>
+        :
+          <ShowImage listImage={listImage} updateImage={this.updateImage} />
+        }
       </div>
 
     );
