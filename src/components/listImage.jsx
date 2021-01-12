@@ -23,7 +23,7 @@ class List extends React.Component {
     if (this.getListLocal) {
       this.setState({loading: true});
       this.dataLocal = JSON.parse(this.getListLocal);
-      let pagination = JSON.parse(this.getPagination);
+      let pagination = JSON.parse(this.getPagination) || {};
       this.setState({ listImage: this.dataLocal, pagination, loading: false, searchText: this.getSearchText });
     }
     this.activeTab();
@@ -48,7 +48,7 @@ class List extends React.Component {
       localStorage.setItem('searchText', this.state.searchText);
       this.dataLocal = listItems.slice();
       this.activeTab();
-      this.setState({ listImage: listItems, sort: undefined, type: undefined, pagination, loading: false, pagination });
+      this.setState({ listImage: listItems, sort: undefined, type: undefined, pagination, loading: false });
     }
     else{
       this.setState({loading: false});
@@ -136,7 +136,7 @@ class List extends React.Component {
     let optionArr = [];
     while(i < total/100){
       i++;
-      optionArr.push(<option className="select-items" value={i}>{i}</option>)
+      optionArr.push(<option key={i} className="select-items" value={i}>{i}</option>)
     }
     return (optionArr);
   }

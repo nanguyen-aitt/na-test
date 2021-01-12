@@ -41,14 +41,14 @@ class Sorter extends React.Component {
           <h3>Please select attribute to sort</h3>
           <div className='select-dialog'>
             <select className='select-type' name="type" id="type" onChange={(e) => this.setState({ type: e.target.value })}>
-              <option value="date_created">Date created</option>
-              <option value="title">Title</option>
+              <option key="date_created" value="date_created">Date created</option>
+              <option key="title" value="title">Title</option>
             </select>
 
 
             <select className='select-value' name="value" id="value" onChange={(e) => this.setState({ value: e.target.value })}>
               {direction[this.state.type].map(item => {
-                return (<option value={item.value}>{item.title}</option>)
+                return (<option key={item.value} value={item.value}>{item.title}</option>)
               })
               }
             </select>

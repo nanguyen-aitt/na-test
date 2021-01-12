@@ -34,9 +34,11 @@ axios.interceptors.response.use(
   }
 );
 
-export default {
+let exportFunction = {
   get: axios.get,
   post: axios.post,
   put: axios.put,
   delete: axios.delete,
 };
+
+export default exportFunction;
