@@ -34,33 +34,32 @@ class Sorter extends React.Component {
       ]
     }
     return (
-      <div>
-        <input type="button" defaultValue="Show Dialog" id="show" onClick={() => this.changeShowPopup('remove')} />
+      <>
+        <button className="button-search"  id="show" onClick={() => this.changeShowPopup('remove')}><i className="fa fa-sort"/> </button>
         <div id="mask" className="hidden" />
         <div id="dialog" className="hidden">
-          <h1>Please pick a color</h1>
-          <label htmlFor="type">Choose a attribute:</label>
+          <h3>Please select attribute to sort</h3>
+          <div className='select-dialog'>
+            <select className='select-type' name="type" id="type" onChange={(e) => this.setState({ type: e.target.value })}>
+              <option value="date_created">Date created</option>
+              <option value="title">Title</option>
+            </select>
 
-          <select name="type" id="type" onChange={(e) => this.setState({ type: e.target.value })}>
-            <option value="date_created">date_created</option>
-            <option value="title">title</option>
-          </select>
 
-          <label htmlFor="value">Choose a direction:</label>
-
-          <select name="value" id="value" onChange={(e) => this.setState({ value: e.target.value })}>
-            {direction[this.state.type].map(item => {
-              return (<option value={item.value}>{item.title}</option>)
-            })
-            }
-          </select>
-          <footer>
-            <input type="button" defaultValue="OK" id="hide" onClick={() => this.changeShowPopup('add', true)} />
-            <input type="button" defaultValue="Cancel" id="hide" onClick={() => this.changeShowPopup('add')} />
-          </footer>
+            <select className='select-value' name="value" id="value" onChange={(e) => this.setState({ value: e.target.value })}>
+              {direction[this.state.type].map(item => {
+                return (<option value={item.value}>{item.title}</option>)
+              })
+              }
+            </select>
+          </div>
+          <div className='footer-dialog'>
+            <input className='select-button-ok' type="button" defaultValue="OK" id="hide" onClick={() => this.changeShowPopup('add', true)} />
+            <input className='select-button-cancel' type="button" defaultValue="Cancel" id="hide" onClick={() => this.changeShowPopup('add')} />
+          </div>
         </div>
         <div id="result" />
-      </div>
+      </>
     );
   }
 }

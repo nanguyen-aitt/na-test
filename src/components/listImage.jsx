@@ -8,13 +8,14 @@ class List extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchText: 'apollo',
+      searchText: '',
       listImage: [],
       pagination: {},
       loading: false
     };
     this.getListLocal = localStorage.getItem('imageNasa');
     this.getPagination = localStorage.getItem('pagination');
+    this.getSearchText = localStorage.getItem('searchText');
   }
 
 
@@ -23,26 +24,31 @@ class List extends React.Component {
       this.setState({loading: true});
       this.dataLocal = JSON.parse(this.getListLocal);
       let pagination = JSON.parse(this.getPagination);
-      this.setState({ listImage: this.dataLocal, pagination, loading: false });
+      this.setState({ listImage: this.dataLocal, pagination, loading: false, searchText: this.getSearchText });
     }
     this.activeTab();
   }
 
-  getList = async () => {
+  getList = async (isResetPagination) => {
+    if(!this.state.searchText && this.state.searchText === ''){
+      return alert("Please input to search");
+    }
+    let paginationNew = isResetPagination ? {} : this.state.pagination;
     this.setState({loading: true});
-    let list = await ImageService.searchImage(this.state.searchText, this.state.pagination.page);
+    let list = await ImageService.searchImage(this.state.searchText, paginationNew.page);
     if (list && list.collection && list.collection.items) {
       let listItems = list.collection.items;
       let total = list.collection.metadata.total_hits;
       let pagination = {
         total: total,
-        page: this.state.pagination.page || 1
+        page: paginationNew.page || 1
       }
       localStorage.setItem('pagination', JSON.stringify(pagination));
       localStorage.setItem('imageNasa', JSON.stringify(listItems));
+      localStorage.setItem('searchText', this.state.searchText);
       this.dataLocal = listItems.slice();
       this.activeTab();
-      this.setState({ listImage: listItems, sort: undefined, type: undefined, pagination, loading: false });
+      this.setState({ listImage: listItems, sort: undefined, type: undefined, pagination, loading: false, pagination });
     }
     else{
       this.setState({loading: false});
@@ -140,25 +146,28 @@ class List extends React.Component {
   }
 
   render() {
-    let { listImage, pagination, loading } = this.state;
+    let { listImage, pagination, loading, searchText } = this.state;
     let page = pagination.page || 1;
     return (
-      <div>
-        <div>
+      <div className='body-app'>
+        <div className='search-sort-buttons'>
           <input
             onChange={(e) => {
-              this.setState({ searchText: e.target.value, pagination: {} })
+              this.setState({ searchText: e.target.value })
             }}
+            value={searchText}
             type="text"
             placeholder="Input text to search"
+            className='input-search'
           />
           <button
             onClick={() => {
-              this.getList();
+              this.getList(true);
             }}
+            className='button-search'
           >
-            Search</button>
-
+            <i className="fa fa-search"></i>
+          </button>
           <Sorter onSubmit={(type, value) => this.onChangeSort(type, value)} />
         </div>
         <div id="main">
@@ -169,19 +178,22 @@ class List extends React.Component {
           </div>
           {pagination.total ?
             <div className="pagination">
+              <div className='pagination-label'>
               <label>{`Show ${(page-1)*100+1} - ${page*100 < pagination.total ? page*100 : pagination.total} of ${pagination.total} items`}</label>
-              <div class="pagination-button">
-                <button class="active" onClick="#">&laquo;</button>
+              </div>
+              <div className="pagination-button">
+                {page > 1 ? <button onClick={() => this.onChangePage(page-1)}>&laquo;Prev</button> : null}
                 <select onChange={(e) => this.onChangePage(+e.target.value)} value={page}>
                   {this.showListPaginaton(pagination.total)}
                 </select>
-                <button onClick="#">&raquo;</button>
+                {page < pagination.total / 100 ? <button onClick={() => this.onChangePage(page+1)}>Next&raquo;</button> : null }
               </div>
             </div>
           : null }
         </div>
+        
         {loading ?
-          <div class="loader"/>
+          <div className="loader"/>
         :
           <ShowImage listImage={listImage} updateImage={this.updateImage} />
         }

@@ -21,7 +21,7 @@ class showImage extends React.Component {
         {listImage.length ? listImage.map((item) => {
             return (
               <div key={item.data[0].nasa_id} className="column">
-                <div>
+                <div className='images'>
                   {item.links ?
                   <img alt={item.data[0].title} src={item.links ? item.links[0].href : null} className='image-item' />
                   :
@@ -30,26 +30,27 @@ class showImage extends React.Component {
                   </video>
                   }
                 </div>
+                <div className='buttons'>
+                  <button className={['button-item', item.like ? 'button-liked' : 'button-unliked'].join(' ')} 
+                    onClick={() => updateImage(item.data[0].nasa_id, { type: 'like', value: !item.like })}
+                  >
+                    <i className="fa fa-thumbs-up"/>
+                  </button>
+                  <button className={['button-item', item.remove ? 'button-removed' : 'button-unliked'].join(' ')} 
+                    onClick={() => updateImage(item.data[0].nasa_id, { type: 'remove', value: !item.remove })}
+                  >
+                    <i className="fa fa-trash"/>
+                  </button>
+                  <button className={['button-item', 'button-unliked'].join(' ')} 
+                    onClick={() => updateImage(item.data[0].nasa_id, { type: 'edit' })}
+                  >
+                    <i className="fa fa-edit"/>
+                  </button>
+                </div>
                 <div className='label-item'>
                   <label >
                     {item.data[0].title}
                   </label>
-                </div>
-                <div>
-                  <button
-                    onClick={() => updateImage(item.data[0].nasa_id, { type: 'like', value: !item.like })}
-                  >
-                    {!item.like ? 'Like' : 'Unlike'}
-                  </button>
-                  <button
-                    onClick={() => updateImage(item.data[0].nasa_id, { type: 'remove', value: !item.remove })}
-                  >
-                    {!item.remove ? 'Remove' : 'Undo'}
-                  </button>
-                  <button
-                    onClick={() => updateImage(item.data[0].nasa_id, { type: 'edit' })}
-                  >Edit
-                        </button>
                 </div>
               </div>
             )
