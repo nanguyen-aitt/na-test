@@ -17,9 +17,7 @@ code {
 }
 .tab{
   width: 270px;
-  float:left;
   height: auto;
-  overflow: hidden;
 }
 .pagination{
   width: calc(100vw - 300px);
